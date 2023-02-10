@@ -15,8 +15,9 @@ def sim(event, context):
         resDict["status"] = "red"
 
     #test
-
+    #test2
     return {
         'statusCode': 200,
         'body': json.dumps(resDict)
     }
+
