@@ -5,14 +5,12 @@ from math import sin, cos, sqrt, atan2, radians
 
 def sim(event, context):
     
-    tl_1 = [57.70556493250048, 11.99211749254271]
-    tl_2 = [57.705567563648366, 11.992202034098431]
+    tl_1 = [57, 13]
+    tl_2 = [57, 10]
 
     lights = [tl_1, tl_2]
 
     event_body = json.loads(event["body"])
-
-    #user_pos = [json.loads(event["lat"]), json.loads(event["lon"])]
     
     user_pos = [event_body["lat"], event_body["lon"]]
 
@@ -46,9 +44,14 @@ def sim(event, context):
 
 def calc_distance(lat1, lon1, lat2, lon2):
     R = 6373.0
-    dlon = lon2 - lon1
-    dlat = lat2 - lat1
-    a = (sin(dlat/2))**2 + cos(lat1) * cos(lat2) * (sin(dlon/2))**2
+    
+    R_lat1 = radians(lat1)
+    R_lon1 = radians(lon1)
+    R_lat2 = radians(lat2)
+    R_lon2 = radians(lon2)
+    dlon = R_lon2 - R_lon1
+    dlat = R_lat2 - R_lat1
+    a = (sin(dlat/2))**2 + cos(R_lat1) * cos(R_lat2) * (sin(dlon/2))**2
     c = 2 * atan2(sqrt(a), sqrt(1-a))
-    distance = R * c
+    distance = R * c * 1000
     return distance
