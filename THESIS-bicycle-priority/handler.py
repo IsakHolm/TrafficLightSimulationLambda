@@ -2,35 +2,52 @@ import json
 import time
 from math import sin, cos, sqrt, atan2, radians
 
-tl_1 = [57, 13]
-tl_2 = [57, 10]
-
-lights = [tl_1, tl_2]
-
 def sim(event, context):
+
+    tl_1 = [57, 13]
+    tl_2 = [57, 10]
+
+    lightsList = [tl_1, tl_2]
 
     event_body = json.loads(event["body"])
     
     user_pos = [event_body["lat"], event_body["lon"]]
     prev_user_pos = [event_body["prev_lat"], event_body["prev_lon"]]
 
-    lightsList = sortTrafficLights(user_pos[0], user_pos[1])
+    lightsListAscendingDistance = sortTrafficLightsList(user_pos[0], user_pos[1], lightsList)
 
-    index = 0
+    index = -1
+    min = 0
 
-    for i, tl in enumerate(lightsList):
-        if calc_distance(user_pos[0], user_pos[1], tl[0], tl[1]) < calc_distance(prev_user_pos[0], prev_user_pos[1], tl[0], tl[1]):
+    # This for-loop loops through a list of traffic lights that are sorted with ascending distance to the biker. 
+    # The loop checks to see if the biker i moving away from the traffic light. If not, that index is chosen and the loop ends.  
+    for i, tl in enumerate(lightsListAscendingDistance):
+        min = calc_distance(float(user_pos[0]), float(user_pos[1]), tl[0], tl[1])
+        if min < calc_distance(float(prev_user_pos[0]), float(prev_user_pos[1]), tl[0], tl[1]):
             index = i
             break
 
+    # If index == -1, then no traffic light was found that the biker is getting closer to. Then this "non-data" is sent and can be interpreted as "nothing to process"
+    if index == -1:
+        res = {
+            "status" : "green",
+            "time_left" : "0",
+            "light_lat": "0",
+            "light_lon": "0",
+            "distance": "0"
+        }
+        return {
+            'statusCode': 200,
+            'body': json.dumps(res)
+        }
 
     now = time.time() % 30
 
     res = {
         "status" : "green",
         "time_left" : int( 15 - ( now % 15 ) ),
-        "light_lat": lightsList[index][0],
-        "light_lon": lightsList[index][1],
+        "light_lat": lightsListAscendingDistance[index][0],
+        "light_lon": lightsListAscendingDistance[index][1],
         "distance": min
     }
     
@@ -42,10 +59,11 @@ def sim(event, context):
         'body': json.dumps(res)
     }
 
-def searchTrafficLights(lat, lon, lightsCurrent):
+# Searches a list (lightsCurrent) for the traffic light that is closest to the point (lat, lon)
+def findMinDistanceTrafficLights(lat, lon, lightsCurrent):
     min = calc_distance(float(lat), float(lon), lightsCurrent[0][0], lightsCurrent[0][1])
     index = 0
-    for i, tl in enumerate(lightsCurrent):
+    for i, tl in enumerate(list(lightsCurrent)):
         tmp = calc_distance(float(lat), float(lon), tl[0], tl[1])
         if tmp < min:
             min = tmp
@@ -53,15 +71,17 @@ def searchTrafficLights(lat, lon, lightsCurrent):
 
     return (index, min)
 
-def sortTrafficLights(lat, lon):
+# Sorts a list of traffic lights where the order is ascending in distance between the point (lat, lon) and the traffic lights
+def sortTrafficLightsList(lat, lon, lights):
     resList = []
-    lightsCopy = lights.copy
+    lightsCopy = lights.copy()
     for i in enumerate(lights):
-        res = searchTrafficLights(lat, lon, lightsCopy)
-        resList.append(lightsCopy.pop(res.index))
+        res = findMinDistanceTrafficLights(lat, lon, lightsCopy)
+        resList.append(lightsCopy.pop(res[0]))
 
     return resList
 
+# Function to calculate the distance in meters between two coordinates
 def calc_distance(lat1, lon1, lat2, lon2):
     R = 6373.0
     
