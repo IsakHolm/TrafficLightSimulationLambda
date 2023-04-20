@@ -4,6 +4,8 @@ from math import sin, cos, sqrt, atan2, radians
 
 def sim(event, context):
 
+    now = time.time() % 30
+
     tl_1 = [57.70673965599801, 11.989307394222436]
     tl_2 = [57.705402662855214, 11.989854564913738]
     tl_3 = [57.701400090079154, 11.991493306489847]
@@ -14,6 +16,24 @@ def sim(event, context):
     
     user_pos = [event_body["lat"], event_body["lon"]]
     prev_user_pos = [event_body["prev_lat"], event_body["prev_lon"]]
+
+    # Send status and time left if request requested debug info
+    if user_pos[0] == "Debug":
+        res = {
+            "status" : "green",
+            "time_left" : int( 15 - ( now % 15 ) ),
+            "light_lat": "0",
+            "light_lon": "0",
+            "distance": "0"
+        }
+    
+        if now < 15:
+            res["status"] = "red"
+
+        return {
+            'statusCode': 200,
+            'body': json.dumps(res)
+        }
 
     lightsListAscendingDistance = sortTrafficLightsList(user_pos[0], user_pos[1], lightsList)
 
@@ -41,8 +61,6 @@ def sim(event, context):
             'statusCode': 200,
             'body': json.dumps(res)
         }
-
-    now = time.time() % 30
 
     res = {
         "status" : "green",
