@@ -4,8 +4,8 @@ from math import sin, cos, sqrt, atan2, radians
 
 def sim(event, context):
 
-    tl_1 = [57, 13]
-    tl_2 = [57, 10]
+    tl_1 = [57.70673965599801, 11.989307394222436]
+    tl_2 = [57.705402662855214, 11.989854564913738]
 
     lightsList = [tl_1, tl_2]
 
@@ -30,7 +30,7 @@ def sim(event, context):
     # If index == -1, then no traffic light was found that the biker is getting closer to. Then this "non-data" is sent and can be interpreted as "nothing to process"
     if index == -1:
         res = {
-            "status" : "green",
+            "status" : "None",
             "time_left" : "0",
             "light_lat": "0",
             "light_lon": "0",
