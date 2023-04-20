@@ -6,8 +6,9 @@ def sim(event, context):
 
     tl_1 = [57.70673965599801, 11.989307394222436]
     tl_2 = [57.705402662855214, 11.989854564913738]
+    tl_3 = [57.701400090079154, 11.991493306489847]
 
-    lightsList = [tl_1, tl_2]
+    lightsList = [tl_1, tl_2, tl_3]
 
     event_body = json.loads(event["body"])
     
